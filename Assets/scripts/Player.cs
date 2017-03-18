@@ -6,6 +6,7 @@ public class Player : MonoBehaviour {
 	private Controller2D controller;
     private float gravity = -20f;
     private float moveSpeed = 6f;
+    private float jumpVelocity = 8f;
     private Vector3 velocity;
 
     private void Awake ()
@@ -19,11 +20,16 @@ public class Player : MonoBehaviour {
         {
             velocity.y = 0;
         }
-        
+
         Vector2 input = new Vector2 (
             Input.GetAxisRaw ("Horizontal"),
             Input.GetAxisRaw ("Vertical")
         );
+
+        if (Input.GetKeyDown (KeyCode.Space) && controller.collisions.below)
+        {
+            velocity.y = jumpVelocity;
+        }
 
         velocity.x = input.x * moveSpeed;
         velocity.y += gravity * Time.deltaTime;
