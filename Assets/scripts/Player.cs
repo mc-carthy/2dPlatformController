@@ -5,6 +5,7 @@ public class Player : MonoBehaviour {
 
 	private Controller2D controller;
     private float gravity = -20f;
+    private float moveSpeed = 6f;
     private Vector3 velocity;
 
     private void Awake ()
@@ -14,6 +15,12 @@ public class Player : MonoBehaviour {
 
     private void Update ()
     {
+        Vector2 input = new Vector2 (
+            Input.GetAxisRaw ("Horizontal"),
+            Input.GetAxisRaw ("Vertical")
+        );
+
+        velocity.x = input.x * moveSpeed;
         velocity.y += gravity * Time.deltaTime;
         controller.Move (velocity * Time.deltaTime);
     }
