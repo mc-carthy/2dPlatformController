@@ -106,8 +106,13 @@ public class Controller2D : MonoBehaviour {
     private void ClimbSlope (ref Vector3 velocity, float slopeAngle)
     {
         float moveDistance = Mathf.Abs (velocity.x);
-        velocity.y = Mathf.Sin (slopeAngle * Mathf.Deg2Rad) * moveDistance;
-        velocity.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (velocity.x);
+        float climbVelocityY = Mathf.Sin (slopeAngle * Mathf.Deg2Rad) * moveDistance;
+        if (velocity.y <= climbVelocityY)
+        {
+            velocity.y = climbVelocityY;
+            velocity.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (velocity.x);
+            collisions.below = true;
+        }
     }
 
     private void UpdateRaycastOrigins ()
