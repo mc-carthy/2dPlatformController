@@ -3,7 +3,7 @@
 [RequireComponent (typeof (BoxCollider2D))]
 public class Controller2D : MonoBehaviour {
 
-    private const float skinWidth = 0.15f;
+    private const float skinWidth = 0.05f;
 
     public CollisionInfo collisions;
 
@@ -65,13 +65,23 @@ public class Controller2D : MonoBehaviour {
 
                 if (i == 0 && slopeAngle <= maxClimbAngle)
                 {
+                    float distToSlopeStart = 0;
+                    if (slopeAngle != collisions.slopeAngleOld)
+                    {
+                        distToSlopeStart = hit.distance - skinWidth;
+                        velocity.x -= distToSlopeStart * directionX;
+                    }
                     ClimbSlope (ref velocity, slopeAngle);
+                    velocity.x += distToSlopeStart * directionX;
                 }
 
-                velocity.x = (hit.distance - skinWidth) * directionX;
-                rayLength = hit.distance;
-                collisions.left = directionX == -1;
-                collisions.right = directionX == 1;
+                if (!collisions.climbingSlope || slopeAngle > maxClimbAngle)
+                {
+                    velocity.x = (hit.distance - skinWidth) * directionX;
+                    rayLength = hit.distance;
+                    collisions.left = directionX == -1;
+                    collisions.right = directionX == 1;
+                }
             }
 
             Debug.DrawRay (rayOrigin, Vector2.right * directionX * rayLength, Color.red);
@@ -112,6 +122,8 @@ public class Controller2D : MonoBehaviour {
             velocity.y = climbVelocityY;
             velocity.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (velocity.x);
             collisions.below = true;
+            collisions.climbingSlope = true;
+            collisions.slopeAngle = slopeAngle;
         }
     }
 
@@ -146,10 +158,16 @@ public class Controller2D : MonoBehaviour {
         public bool above, below; 
         public bool left, right;
 
+        public bool climbingSlope;
+        public float slopeAngle, slopeAngleOld;
+
         public void Reset ()
         {
             above = below = false;
             left = right = false;
+            climbingSlope = false;
+            slopeAngleOld = slopeAngle;
+            slopeAngle = 0f;
         }
 
     }
