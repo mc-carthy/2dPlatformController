@@ -16,6 +16,7 @@ public class Controller2D : MonoBehaviour {
     private float verticalRaySpacing;
 
     private float maxClimbAngle = 60;
+    private float maxDescendAngle = 75;
 
 	private BoxCollider2D collider;
     private RaycastOrigins raycastOrigins;
@@ -34,6 +35,11 @@ public class Controller2D : MonoBehaviour {
     {
         UpdateRaycastOrigins ();
         collisions.Reset ();
+
+        if (velocity.y < 0)
+        {
+            DescendSlope (ref velocity);
+        }
 
         if (velocity.x != 0)
         {
@@ -158,6 +164,36 @@ public class Controller2D : MonoBehaviour {
         }
     }
 
+    private void DescendSlope (ref Vector3 velocity)
+    {
+        float directionX = Mathf.Sign (velocity.x);
+        Vector2 rayOrigin = (directionX == -1) ? raycastOrigins.bottomRight : raycastOrigins.bottomLeft;
+        RaycastHit2D hit = Physics2D.Raycast (rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
+
+        if (hit)
+        {
+            float slopeAngle = Vector2.Angle (hit.normal, Vector2.up);
+
+            if (slopeAngle != 0 && slopeAngle <= maxDescendAngle)
+            {
+                if (Mathf.Sign (hit.normal.x) == directionX)
+                {
+                    if (hit.distance - skinWidth <= Mathf.Tan (slopeAngle * Mathf.Deg2Rad * Mathf.Abs (velocity.x)))
+                    {
+                        float moveDistance = Mathf.Abs (velocity.x);
+                        float descendVelocityY = Mathf.Sin (slopeAngle * Mathf.Deg2Rad) * moveDistance;
+                        velocity.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (velocity.x);
+                        velocity.y -= descendVelocityY;
+
+                        collisions.slopeAngle = slopeAngle;
+                        collisions.descendingSlope = true;
+                        collisions.below = true;
+                    }
+                }
+            }
+        }
+    }
+
     private void UpdateRaycastOrigins ()
     {
         Bounds bounds = collider.bounds;
@@ -190,13 +226,14 @@ public class Controller2D : MonoBehaviour {
         public bool left, right;
 
         public bool climbingSlope;
+        public bool descendingSlope;
         public float slopeAngle, slopeAngleOld;
 
         public void Reset ()
         {
             above = below = false;
             left = right = false;
-            climbingSlope = false;
+            climbingSlope = descendingSlope = false;
             slopeAngleOld = slopeAngle;
             slopeAngle = 0f;
         }
