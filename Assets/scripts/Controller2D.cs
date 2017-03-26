@@ -35,6 +35,7 @@ public class Controller2D : MonoBehaviour {
     {
         UpdateRaycastOrigins ();
         collisions.Reset ();
+        collisions.velocityOld = velocity;
 
         if (velocity.y < 0)
         {
@@ -75,6 +76,11 @@ public class Controller2D : MonoBehaviour {
                     if (slopeAngle != collisions.slopeAngleOld)
                     {
                         distToSlopeStart = hit.distance - skinWidth;
+                        if (collisions.descendingSlope)
+                        {
+                            collisions.descendingSlope = false;
+                            velocity = collisions.velocityOld;
+                        }
                         velocity.x -= distToSlopeStart * directionX;
                     }
                     ClimbSlope (ref velocity, slopeAngle);
@@ -228,6 +234,8 @@ public class Controller2D : MonoBehaviour {
         public bool climbingSlope;
         public bool descendingSlope;
         public float slopeAngle, slopeAngleOld;
+
+        public Vector3 velocityOld;
 
         public void Reset ()
         {
