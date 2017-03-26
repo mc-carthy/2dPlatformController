@@ -3,7 +3,7 @@
 [RequireComponent (typeof (BoxCollider2D))]
 public class Controller2D : MonoBehaviour {
 
-    private const float skinWidth = 0.05f;
+    private const float skinWidth = 0.015f;
 
     public CollisionInfo collisions;
 
@@ -121,6 +121,26 @@ public class Controller2D : MonoBehaviour {
             }
 
             Debug.DrawRay (rayOrigin, Vector2.up * directionY * rayLength, Color.red);
+        }
+
+        if (collisions.climbingSlope)
+        {
+            float directionX = Mathf.Sign (velocity.x);
+            rayLength = Mathf.Abs (velocity.x) + skinWidth;
+            Vector2 rayOrigin = ((directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight) + (Vector2.up * velocity.y);
+
+            RaycastHit2D hit = Physics2D.Raycast (rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
+
+            if (hit)
+            {
+                float slopeAngle = Vector2.Angle (hit.normal, Vector2.up);
+
+                if (slopeAngle != collisions.slopeAngle)
+                {
+                    velocity.x = (hit.distance - skinWidth) * directionX;
+                    collisions.slopeAngle = slopeAngle;
+                }
+            }
         }
     }
 
