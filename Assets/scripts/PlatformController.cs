@@ -84,6 +84,32 @@ public class PlatformController : RaycastController {
                 }
             }
         }
+
+        // Passenger on top of horizontally/downward moving platform
+        if (directionY == -1 || velocity.y == 0 && velocity.x != 0)
+        {
+            float rayLength = skinWidth * 2;
+
+            for (int i = 0; i < verticalRayCount; i++)
+            {
+                Vector2 rayOrigin = raycastOrigins.topLeft + Vector2.right * (verticalRaySpacing * i);
+
+                RaycastHit2D hit = Physics2D.Raycast (rayOrigin, Vector2.up, rayLength, passengerMask);
+
+                if (hit)
+                {
+                    if (!movedPassengers.Contains (hit.transform))
+                    {
+                        movedPassengers.Add (hit.transform);
+
+                        float pushX = velocity.x;
+                        float pushY = velocity.y;
+
+                        hit.transform.Translate (new Vector3 (pushX, pushY));
+                    }
+                }
+            }
+        }
     }
 
 }
