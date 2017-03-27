@@ -34,9 +34,9 @@ public class PlatformController : RaycastController {
     {
         foreach (PassengerMovement passenger in passengerMovement)
         {
-            if (passenger.moveBeforePlatform == beforeMovePlatform)
+            if (passenger.isMovedBeforePlatform == beforeMovePlatform)
             {
-                passenger.transform.GetComponent<Controller2D> ().Move (passenger.velocity);
+                passenger.transform.GetComponent<Controller2D> ().Move (passenger.velocity, passenger.isStandingOnPlatform);
             }
         }
     }
@@ -134,15 +134,15 @@ public class PlatformController : RaycastController {
     private struct PassengerMovement {
         public Transform transform;
         public Vector3 velocity;
-        public bool standingOnPlatform;
-        public bool moveBeforePlatform;
+        public bool isStandingOnPlatform;
+        public bool isMovedBeforePlatform;
 
-        public PassengerMovement (Transform _transform, Vector3 _velocity, bool _standingOnPlatform, bool _moveBeforePlatform)
+        public PassengerMovement (Transform _transform, Vector3 _velocity, bool _isStandingOnPlatform, bool _isMovedBeforePlatform)
         {
             transform = _transform;
             velocity = _velocity;
-            standingOnPlatform = _standingOnPlatform;
-            moveBeforePlatform = _moveBeforePlatform;
+            isStandingOnPlatform = _isStandingOnPlatform;
+            isMovedBeforePlatform = _isMovedBeforePlatform;
         }
     }
 

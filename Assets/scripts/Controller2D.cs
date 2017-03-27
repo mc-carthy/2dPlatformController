@@ -6,7 +6,7 @@ public class Controller2D : RaycastController {
     private float maxClimbAngle = 60;
     private float maxDescendAngle = 75;
 
-    public void Move (Vector3 velocity)
+    public void Move (Vector3 velocity, bool isStandingOnPlatform = false)
     {
         UpdateRaycastOrigins ();
         collisions.Reset ();
@@ -27,6 +27,11 @@ public class Controller2D : RaycastController {
         }
 
         transform.Translate (velocity);
+
+        if (isStandingOnPlatform)
+        {
+            collisions.below = true;
+        }
     }
 
     private void HorizontalCollisions (ref Vector3 velocity)
