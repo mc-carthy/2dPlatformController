@@ -13,6 +13,9 @@ public class PlatformController : RaycastController {
     private bool isCyclic;
     [SerializeField]
     private float waitTime;
+    [SerializeField]
+    [RangeAttribute (0, 3)]
+    private float ease;
 
     private List<PassengerMovement> passengerMovement;
     private Dictionary<Transform, Controller2D> passengerDictionary = new Dictionary<Transform, Controller2D> ();
@@ -53,8 +56,11 @@ public class PlatformController : RaycastController {
         int toWaypointIndex = (fromWaypointIndex + 1) % globalWaypoints.Length;
         float distBetweenWaypoints = Vector3.Distance (globalWaypoints [fromWaypointIndex], globalWaypoints [toWaypointIndex]);
         percentBetweenWaypoints += Time.deltaTime * speed / distBetweenWaypoints;
+        percentBetweenWaypoints = Mathf.Clamp01 (percentBetweenWaypoints);
 
-        Vector3 newPos = Vector3.Lerp (globalWaypoints [fromWaypointIndex], globalWaypoints [toWaypointIndex], percentBetweenWaypoints);
+        float easedPercentBetweenWaypoints = Ease (percentBetweenWaypoints);
+
+        Vector3 newPos = Vector3.Lerp (globalWaypoints [fromWaypointIndex], globalWaypoints [toWaypointIndex], easedPercentBetweenWaypoints);
 
         if (percentBetweenWaypoints >= 1)
         {
@@ -185,6 +191,12 @@ public class PlatformController : RaycastController {
         {
             globalWaypoints [i] = localWaypoints [i] + transform.position;
         }
+    }
+
+    private float Ease (float x)
+    {
+        float a = ease + 1;
+        return (Mathf.Pow (x, a) / (Mathf.Pow (x, a) + Mathf.Pow (1 - x, a)));
     }
 
     private void OnDrawGizmos ()
