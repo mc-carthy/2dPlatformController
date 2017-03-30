@@ -2,10 +2,16 @@
 
 public class Controller2D : RaycastController {
 
+    private Vector2 playerInput;
+    public Vector2 PlayerInput {
+        get {
+            return playerInput;
+        }
+    }
+    
     public CollisionInfo collisions;
     private float maxClimbAngle = 60;
     private float maxDescendAngle = 75;
-    private Vector2 playerInput;
 
     protected override void Start ()
     {
