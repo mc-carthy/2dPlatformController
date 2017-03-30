@@ -14,6 +14,9 @@ public class Player : MonoBehaviour {
     private float velocitySmoothingX;
     private Vector3 velocity;
     private float wallSlideSpeedMax = 3f;
+    private Vector2 wallJumpClimb = new Vector2 (7.5f, 16f);
+    private Vector2 wallJumpOff = new Vector2 (8.5f, 7f);
+    private Vector2 wallJumpLeap = new Vector2 (18f, 17f);
 
     private void Awake ()
     {
@@ -28,6 +31,13 @@ public class Player : MonoBehaviour {
 
     private void Update ()
     {
+        Vector2 input = new Vector2 (
+            Input.GetAxisRaw ("Horizontal"),
+            Input.GetAxisRaw ("Vertical")
+        );
+
+        int wallDirX = (controller.collisions.left) ? -1 : 1;
+        
         bool isWallSliding = false;
         if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
         {
@@ -43,14 +53,30 @@ public class Player : MonoBehaviour {
             velocity.y = 0;
         }
 
-        Vector2 input = new Vector2 (
-            Input.GetAxisRaw ("Horizontal"),
-            Input.GetAxisRaw ("Vertical")
-        );
-
-        if (Input.GetKeyDown (KeyCode.Space) && controller.collisions.below)
+        if (Input.GetKeyDown (KeyCode.Space))
         {
-            velocity.y = jumpVelocity;
+            if (isWallSliding)
+            {
+                if (wallDirX == Mathf.Sign (input.x))
+                {
+                    velocity.x = -wallDirX * wallJumpClimb.x;
+                    velocity.y = wallJumpClimb.y;
+                }
+                else if (input.x == 0)
+                {
+                    velocity.x = -wallDirX * wallJumpOff.x;
+                    velocity.y = wallJumpOff.y; 
+                }
+                else
+                {
+                    velocity.x = -wallDirX * wallJumpLeap.x;
+                    velocity.y = wallJumpLeap.y;
+                }
+            }
+            if (controller.collisions.below)
+            {
+                velocity.y = jumpVelocity;
+            }
         }
 
         float targetVelocityX = input.x * moveSpeed;
