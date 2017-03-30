@@ -5,6 +5,13 @@ public class RaycastController : MonoBehaviour {
 
     protected const float skinWidth = 0.015f;
 
+	protected BoxCollider2D collider;
+    public BoxCollider2D Collider {
+        get {
+            return collider;
+        }
+    }
+
     [SerializeField]
     protected LayerMask collisionMask;
 
@@ -13,7 +20,6 @@ public class RaycastController : MonoBehaviour {
     protected float horizontalRaySpacing;
     protected float verticalRaySpacing;
 
-	protected BoxCollider2D collider;
     protected RaycastOrigins raycastOrigins;
 
     protected virtual void Awake ()
