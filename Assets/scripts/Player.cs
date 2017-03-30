@@ -17,6 +17,8 @@ public class Player : MonoBehaviour {
     private Vector2 wallJumpClimb = new Vector2 (7.5f, 16f);
     private Vector2 wallJumpOff = new Vector2 (8.5f, 7f);
     private Vector2 wallJumpLeap = new Vector2 (18f, 17f);
+    private float wallStickTime = 0.25f;
+    private float timeToWallRelease;
 
     private void Awake ()
     {
@@ -37,6 +39,9 @@ public class Player : MonoBehaviour {
         );
 
         int wallDirX = (controller.collisions.left) ? -1 : 1;
+
+        float targetVelocityX = input.x * moveSpeed;
+        velocity.x = Mathf.SmoothDamp (velocity.x, targetVelocityX, ref velocitySmoothingX, (controller.collisions.below) ? accelerationTimeGround : accelerationTimeAir);
         
         bool isWallSliding = false;
         if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
@@ -45,6 +50,25 @@ public class Player : MonoBehaviour {
             if (velocity.y < -wallSlideSpeedMax)
             {
                 velocity.y = -wallSlideSpeedMax;
+            }
+
+            if (timeToWallRelease > 0)
+            {
+                velocitySmoothingX = 0;
+                velocity.x = 0;
+
+                if (Mathf.Sign (input.x) != wallDirX && input.x != 0)
+                {
+                    timeToWallRelease -= Time.deltaTime;
+                }
+                else
+                {
+                    timeToWallRelease = wallStickTime;
+                }
+            }
+            else
+            {
+                timeToWallRelease = wallStickTime;
             }
         }
 
@@ -79,8 +103,6 @@ public class Player : MonoBehaviour {
             }
         }
 
-        float targetVelocityX = input.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp (velocity.x, targetVelocityX, ref velocitySmoothingX, (controller.collisions.below) ? accelerationTimeGround : accelerationTimeAir);
         velocity.y += gravity * Time.deltaTime;
         controller.Move (velocity * Time.deltaTime);
     }
