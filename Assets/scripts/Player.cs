@@ -13,6 +13,7 @@ public class Player : MonoBehaviour {
     private float jumpVelocity;
     private float velocitySmoothingX;
     private Vector3 velocity;
+    private float wallSlideSpeedMax = 3f;
 
     private void Awake ()
     {
@@ -27,6 +28,16 @@ public class Player : MonoBehaviour {
 
     private void Update ()
     {
+        bool isWallSliding = false;
+        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
+        {
+            isWallSliding = true;
+            if (velocity.y < -wallSlideSpeedMax)
+            {
+                velocity.y = -wallSlideSpeedMax;
+            }
+        }
+
         if (controller.collisions.above || controller.collisions.below)
         {
             velocity.y = 0;
