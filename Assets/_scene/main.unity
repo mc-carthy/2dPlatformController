@@ -777,6 +777,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   move: {x: 0, y: 0, z: 0}
+  localWaypoints:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: -2, z: 0}
 --- !u!1 &1931257248
 GameObject:
   m_ObjectHideFlags: 0

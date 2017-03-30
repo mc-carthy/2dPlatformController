@@ -6,21 +6,28 @@ public class PlatformController : RaycastController {
     [SerializeField]
     private LayerMask passengerMask;
     [SerializeField]
-    private Vector3 move;
+    private Vector3[] localWaypoints;
+    [SerializeField]
+    private float speed;
+
 
     private List<PassengerMovement> passengerMovement;
     private Dictionary<Transform, Controller2D> passengerDictionary = new Dictionary<Transform, Controller2D> ();
+    private Vector3[] globalWaypoints;
+    private int fromWaypointIndex;
+    private float percentBetweenWaypoints;
 
 	protected override void Start ()
     {
         base.Start ();
+        SetGlobalWaypoints ();
     }
 
     private void Update ()
     {
         UpdateRaycastOrigins ();
 
-        Vector3 velocity = move * Time.deltaTime;
+        Vector3 velocity = CalculatePlatformMovement ();
 
         CalculatePassengerMovement (velocity);
 
@@ -29,6 +36,27 @@ public class PlatformController : RaycastController {
         transform.Translate (velocity);
 
         MovePassengers (false);
+    }
+
+    private Vector3 CalculatePlatformMovement ()
+    {
+        int toWaypointIndex = fromWaypointIndex + 1;
+        float distBetweenWaypoints = Vector3.Distance (globalWaypoints [fromWaypointIndex], globalWaypoints [toWaypointIndex]);
+        percentBetweenWaypoints += Time.deltaTime * speed / distBetweenWaypoints;
+
+        Vector3 newPos = Vector3.Lerp (globalWaypoints [fromWaypointIndex], globalWaypoints [toWaypointIndex], percentBetweenWaypoints);
+
+        if (percentBetweenWaypoints >= 1)
+        {
+            percentBetweenWaypoints = 0;
+            fromWaypointIndex++;
+            if (fromWaypointIndex >= globalWaypoints.Length - 1)
+            {
+                fromWaypointIndex = 0;
+                System.Array.Reverse (globalWaypoints);
+            }
+        }
+        return newPos - transform.position;
     }
 
     private void MovePassengers (bool beforeMovePlatform)
@@ -132,6 +160,31 @@ public class PlatformController : RaycastController {
                         passengerMovement.Add (new PassengerMovement (hit.transform, new Vector3 (pushX, pushY), true, false));
                     }
                 }
+            }
+        }
+    }
+
+    private void SetGlobalWaypoints ()
+    {
+        globalWaypoints = new Vector3 [localWaypoints.Length];
+        for (int i = 0; i < globalWaypoints.Length; i++)
+        {
+            globalWaypoints [i] = localWaypoints [i] + transform.position;
+        }
+    }
+
+    private void OnDrawGizmos ()
+    {
+        if (localWaypoints != null)
+        {
+            Gizmos.color = Color.red;
+            float size = 0.3f;
+
+            for (int i = 0; i < localWaypoints.Length; i++)
+            {
+                Vector3 globalPosition = (Application.isPlaying) ? globalWaypoints[i] : localWaypoints[i] + transform.position;
+                Gizmos.DrawLine (globalPosition - Vector3.up * size, globalPosition + Vector3.up * size);
+                Gizmos.DrawLine (globalPosition - Vector3.left * size, globalPosition + Vector3.left * size);
             }
         }
     }
