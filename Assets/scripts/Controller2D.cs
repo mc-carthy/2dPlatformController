@@ -5,6 +5,7 @@ public class Controller2D : RaycastController {
     public CollisionInfo collisions;
     private float maxClimbAngle = 60;
     private float maxDescendAngle = 75;
+    private Vector2 playerInput;
 
     protected override void Start ()
     {
@@ -14,9 +15,15 @@ public class Controller2D : RaycastController {
 
     public void Move (Vector3 velocity, bool isStandingOnPlatform = false)
     {
+        Move (velocity, Vector2.zero, isStandingOnPlatform);
+    }
+
+    public void Move (Vector3 velocity, Vector2 input, bool isStandingOnPlatform = false)
+    {
         UpdateRaycastOrigins ();
         collisions.Reset ();
         collisions.velocityOld = velocity;
+        playerInput = input;
 
         if (velocity.x != 0)
         {
@@ -125,6 +132,16 @@ public class Controller2D : RaycastController {
                     {
                         continue;
                     }
+                    if (collisions.isFallingThroughPlatform)
+                    {
+                        continue;
+                    }
+                    if (playerInput.y == -1) // TODO - Change this to trigger over certain deadzone threshold
+                    {
+                        collisions.isFallingThroughPlatform = true;
+                        Invoke ("ResetFallingThroughPlatform", 0.25f);
+                        continue;
+                    }
                 }
 
                 velocity.y = (hit.distance - skinWidth) * directionY;
@@ -206,6 +223,11 @@ public class Controller2D : RaycastController {
             }
         }
     }
+    
+    private void ResetFallingThroughPlatform ()
+    {
+        collisions.isFallingThroughPlatform = false;
+    }
 
     public struct CollisionInfo {
         public bool above, below; 
@@ -217,6 +239,7 @@ public class Controller2D : RaycastController {
 
         public Vector3 velocityOld;
         public int faceDirection;
+        public bool isFallingThroughPlatform;
 
         public void Reset ()
         {
