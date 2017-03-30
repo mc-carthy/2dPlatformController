@@ -119,6 +119,14 @@ public class Controller2D : RaycastController {
 
             if (hit)
             {
+                if (hit.collider.tag == "passThrough")
+                {
+                    if (directionY == 1 || hit.distance == 0)
+                    {
+                        continue;
+                    }
+                }
+
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
 
