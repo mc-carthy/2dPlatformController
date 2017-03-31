@@ -10,7 +10,7 @@ public class Controller2D : RaycastController {
     }
 
     public CollisionInfo collisions;
-    private float maxSlopeAngle = 40f;
+    private float maxSlopeAngle = 20f;
 
     protected override void Start ()
     {
@@ -94,7 +94,7 @@ public class Controller2D : RaycastController {
                         }
                         moveDist.x -= distToSlopeStart * directionX;
                     }
-                    ClimbSlope (ref moveDist, slopeAngle);
+                    ClimbSlope (ref moveDist, slopeAngle, hit.normal);
                     moveDist.x += distToSlopeStart * directionX;
                 }
 
@@ -180,12 +180,13 @@ public class Controller2D : RaycastController {
                 {
                     moveDist.x = (hit.distance - skinWidth) * directionX;
                     collisions.slopeAngle = slopeAngle;
+                    collisions.slopeNormal = hit.normal;
                 }
             }
         }
     }
 
-    private void ClimbSlope (ref Vector2 moveDist, float slopeAngle)
+    private void ClimbSlope (ref Vector2 moveDist, float slopeAngle, Vector2 slopeNormal)
     {
         float moveDistance = Mathf.Abs (moveDist.x);
         float climbVelocityY = Mathf.Sin (slopeAngle * Mathf.Deg2Rad) * moveDistance;
@@ -196,6 +197,7 @@ public class Controller2D : RaycastController {
             collisions.below = true;
             collisions.climbingSlope = true;
             collisions.slopeAngle = slopeAngle;
+            collisions.slopeNormal = slopeNormal;
         }
     }
 
@@ -231,6 +233,7 @@ public class Controller2D : RaycastController {
                             collisions.slopeAngle = slopeAngle;
                             collisions.descendingSlope = true;
                             collisions.below = true;
+                            collisions.slopeNormal = hit.normal;
                         }
                     }
                 }
@@ -249,6 +252,7 @@ public class Controller2D : RaycastController {
                 moveDist.x = Mathf.Sign (hit.normal.x) * (Mathf.Abs (moveDist.y) - hit.distance) / (Mathf.Tan (slopeAngle * Mathf.Deg2Rad));
                 collisions.slopeAngle = slopeAngle;
                 collisions.slidingDownSlope = true;
+                collisions.slopeNormal = hit.normal;
             }
         }
     }
@@ -266,6 +270,7 @@ public class Controller2D : RaycastController {
         public bool descendingSlope;
         public bool slidingDownSlope;
         public float slopeAngle, slopeAngleOld;
+        public Vector2 slopeNormal;
 
         public Vector2 velocityOld;
         public int faceDirection;
@@ -279,6 +284,7 @@ public class Controller2D : RaycastController {
             slidingDownSlope = false;
             slopeAngleOld = slopeAngle;
             slopeAngle = 0f;
+            slopeNormal = Vector2.zero;
         }
 
     }

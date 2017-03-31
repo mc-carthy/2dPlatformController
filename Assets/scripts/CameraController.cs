@@ -9,7 +9,7 @@ public class CameraController : MonoBehaviour {
     private float verticalOffset = 1f;
     private float lookAheadDistX = 4f;
     private float lookSmoothTimeX = 0.5f;
-    private float lookSmoothTimeY = 0.5f;
+    private float lookSmoothTimeY = 0.1f;
     private float currentLookAheadX;
     private float targetLookAheadX;
     private float lookAheadDirectionX;
