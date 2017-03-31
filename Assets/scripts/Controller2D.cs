@@ -8,7 +8,7 @@ public class Controller2D : RaycastController {
             return playerInput;
         }
     }
-    
+
     public CollisionInfo collisions;
     private float maxClimbAngle = 60;
     private float maxDescendAngle = 75;
@@ -19,36 +19,36 @@ public class Controller2D : RaycastController {
         collisions.faceDirection = 1;
     }
 
-    public void Move (Vector3 velocity, bool isStandingOnPlatform = false)
+    public void Move (Vector2 moveDistance, bool isStandingOnPlatform = false)
     {
-        Move (velocity, Vector2.zero, isStandingOnPlatform);
+        Move (moveDistance, Vector2.zero, isStandingOnPlatform);
     }
 
-    public void Move (Vector3 velocity, Vector2 input, bool isStandingOnPlatform = false)
+    public void Move (Vector2 moveDistance, Vector2 input, bool isStandingOnPlatform = false)
     {
         UpdateRaycastOrigins ();
         collisions.Reset ();
-        collisions.velocityOld = velocity;
+        collisions.velocityOld = moveDistance;
         playerInput = input;
 
-        if (velocity.x != 0)
+        if (moveDistance.x != 0)
         {
-            collisions.faceDirection = (int) Mathf.Sign (velocity.x);
+            collisions.faceDirection = (int) Mathf.Sign (moveDistance.x);
         }
 
-        if (velocity.y < 0)
+        if (moveDistance.y < 0)
         {
-            DescendSlope (ref velocity);
+            DescendSlope (ref moveDistance);
         }
 
-        HorizontalCollisions (ref velocity);
+        HorizontalCollisions (ref moveDistance);
         
-        if (velocity.y != 0)
+        if (moveDistance.y != 0)
         {
-            VerticalCollisions (ref velocity);
+            VerticalCollisions (ref moveDistance);
         }
 
-        transform.Translate (velocity);
+        transform.Translate (moveDistance);
 
         if (isStandingOnPlatform)
         {
@@ -56,7 +56,7 @@ public class Controller2D : RaycastController {
         }
     }
 
-    private void HorizontalCollisions (ref Vector3 velocity)
+    private void HorizontalCollisions (ref Vector2 velocity)
     {
         float directionX = collisions.faceDirection;
         float rayLength = Mathf.Abs (velocity.x) + skinWidth;
@@ -118,7 +118,7 @@ public class Controller2D : RaycastController {
         }
     }
 
-    private void VerticalCollisions (ref Vector3 velocity)
+    private void VerticalCollisions (ref Vector2 velocity)
     {
         float directionY = Mathf.Sign (velocity.y);
         float rayLength = Mathf.Abs (velocity.y) + skinWidth;
@@ -186,7 +186,7 @@ public class Controller2D : RaycastController {
         }
     }
 
-    private void ClimbSlope (ref Vector3 velocity, float slopeAngle)
+    private void ClimbSlope (ref Vector2 velocity, float slopeAngle)
     {
         float moveDistance = Mathf.Abs (velocity.x);
         float climbVelocityY = Mathf.Sin (slopeAngle * Mathf.Deg2Rad) * moveDistance;
@@ -200,7 +200,7 @@ public class Controller2D : RaycastController {
         }
     }
 
-    private void DescendSlope (ref Vector3 velocity)
+    private void DescendSlope (ref Vector2 velocity)
     {
         float directionX = Mathf.Sign (velocity.x);
         Vector2 rayOrigin = (directionX == -1) ? raycastOrigins.bottomRight : raycastOrigins.bottomLeft;
@@ -243,7 +243,7 @@ public class Controller2D : RaycastController {
         public bool descendingSlope;
         public float slopeAngle, slopeAngleOld;
 
-        public Vector3 velocityOld;
+        public Vector2 velocityOld;
         public int faceDirection;
         public bool isFallingThroughPlatform;
 

@@ -4,6 +4,7 @@
 public class RaycastController : MonoBehaviour {
 
     protected const float skinWidth = 0.015f;
+    private const float distBetweenRays = 0.25f;
 
 	protected BoxCollider2D collider;
     public BoxCollider2D Collider {
@@ -15,8 +16,8 @@ public class RaycastController : MonoBehaviour {
     [SerializeField]
     protected LayerMask collisionMask;
 
-    protected int horizontalRayCount = 4;
-    protected int verticalRayCount = 4;
+    protected int horizontalRayCount;
+    protected int verticalRayCount;
     protected float horizontalRaySpacing;
     protected float verticalRaySpacing;
 
@@ -48,8 +49,11 @@ public class RaycastController : MonoBehaviour {
         Bounds bounds = collider.bounds;
         bounds.Expand (skinWidth * -2);
 
-        horizontalRayCount = Mathf.Clamp (horizontalRayCount, 2, int.MaxValue);
-        verticalRayCount = Mathf.Clamp (verticalRayCount, 2, int.MaxValue);
+        float boundsWidth = bounds.size.x;
+        float boundsHeight = bounds.size.y;
+
+        horizontalRayCount = Mathf.RoundToInt (boundsHeight / distBetweenRays);
+        verticalRayCount = Mathf.RoundToInt (boundsWidth / distBetweenRays);
 
         horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
         verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
