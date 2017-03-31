@@ -21,6 +21,10 @@ public class Player : MonoBehaviour {
     private Vector2 wallJumpLeap = new Vector2 (18f, 17f);
     private float wallStickTime = 0.25f;
     private float timeToWallRelease;
+    private Vector2 directionalInput;
+    private bool isWallSliding;
+    private int wallDirX;
+
 
     private void Awake ()
     {
@@ -36,17 +40,67 @@ public class Player : MonoBehaviour {
 
     private void Update ()
     {
-        Vector2 input = new Vector2 (
-            Input.GetAxisRaw ("Horizontal"),
-            Input.GetAxisRaw ("Vertical")
-        );
+        CalculateVelocity ();
+        HandleWallSliding ();
 
-        int wallDirX = (controller.collisions.left) ? -1 : 1;
+        controller.Move (velocity * Time.deltaTime, directionalInput);
 
-        float targetVelocityX = input.x * moveSpeed;
+        if (controller.collisions.above || controller.collisions.below)
+        {
+            velocity.y = 0;
+        }
+    }
+
+    public void SetDirectionalInput (Vector2 input)
+    {
+        directionalInput = input;
+    }
+
+    public void OnJumpInputDown ()
+    {
+        if (isWallSliding)
+        {
+            if (wallDirX == Mathf.Sign (directionalInput.x))
+            {
+                velocity.x = -wallDirX * wallJumpClimb.x;
+                velocity.y = wallJumpClimb.y;
+            }
+            else if (directionalInput.x == 0)
+            {
+                velocity.x = -wallDirX * wallJumpOff.x;
+                velocity.y = wallJumpOff.y; 
+            }
+            else
+            {
+                velocity.x = -wallDirX * wallJumpLeap.x;
+                velocity.y = wallJumpLeap.y;
+            }
+        }
+        if (controller.collisions.below)
+        {
+            velocity.y = maxJumpVelocity;
+        }
+    }
+
+    public void OnJumpInputUp ()
+    {
+        if (velocity.y > minJumpVelocity)
+        {
+            velocity.y = minJumpVelocity;
+        } 
+    }
+
+    private void CalculateVelocity ()
+    {
+        float targetVelocityX = directionalInput.x * moveSpeed;
         velocity.x = Mathf.SmoothDamp (velocity.x, targetVelocityX, ref velocitySmoothingX, (controller.collisions.below) ? accelerationTimeGround : accelerationTimeAir);
-        
-        bool isWallSliding = false;
+        velocity.y += gravity * Time.deltaTime;
+    }
+
+    private void HandleWallSliding ()
+    {
+        wallDirX = (controller.collisions.left) ? -1 : 1;
+        isWallSliding = false;
         if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
         {
             isWallSliding = true;
@@ -60,7 +114,7 @@ public class Player : MonoBehaviour {
                 velocitySmoothingX = 0;
                 velocity.x = 0;
 
-                if (Mathf.Sign (input.x) != wallDirX && input.x != 0)
+                if (Mathf.Sign (directionalInput.x) != wallDirX && directionalInput.x != 0)
                 {
                     timeToWallRelease -= Time.deltaTime;
                 }
@@ -73,47 +127,6 @@ public class Player : MonoBehaviour {
             {
                 timeToWallRelease = wallStickTime;
             }
-        }
-
-        if (Input.GetKeyDown (KeyCode.Space))
-        {
-            if (isWallSliding)
-            {
-                if (wallDirX == Mathf.Sign (input.x))
-                {
-                    velocity.x = -wallDirX * wallJumpClimb.x;
-                    velocity.y = wallJumpClimb.y;
-                }
-                else if (input.x == 0)
-                {
-                    velocity.x = -wallDirX * wallJumpOff.x;
-                    velocity.y = wallJumpOff.y; 
-                }
-                else
-                {
-                    velocity.x = -wallDirX * wallJumpLeap.x;
-                    velocity.y = wallJumpLeap.y;
-                }
-            }
-            if (controller.collisions.below)
-            {
-                velocity.y = maxJumpVelocity;
-            }
-        }
-        if (Input.GetKeyUp (KeyCode.Space))
-        {
-            if (velocity.y > minJumpVelocity)
-            {
-                velocity.y = minJumpVelocity;
-            }
-        }
-
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move (velocity * Time.deltaTime, input);
-
-        if (controller.collisions.above || controller.collisions.below)
-        {
-            velocity.y = 0;
         }
     }
 
